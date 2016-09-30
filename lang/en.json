@@ -16,6 +16,13 @@
 	"l_email":"Email that will be notified",
 	"l_api_key_email":"API key from https://mandrillapp.com",
 	"h_api_key_email":"After registration email on the tab Setting create a key (looks like: VFfeEspkFL1YqVSihhfqHw)",
+	
+	"l_pn_api_key":"API-Key",
+	"h_pn_api_key":"Enter your API-Key from PushOver.",
+	"l_pn_user_key":"User-Key",
+	"h_pn_user_key":"Enter your User-Key from PushOver.",
+	"l_pn_user_device":"Recipient",
+	"h_pn_user_device":"Enter the name of the device that should get the messages. Leave this field empty to receive messages on all your devices.",
 	"l_switches":"List of switches:",
 	"on":"On",
 	"off":"Off",

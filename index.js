@@ -1,10 +1,11 @@
-/*** SecurityMode Z-Way HA module *******************************************
+/*** SecurityModeCustom Z-Way HA module *******************************************
 
-Version: 1.2.1
-(c) Z-Wave.Me, 2014
+Version: 1.0.0
+
+This is a custom version of SecurityMode module that comes with Z-Way
 -----------------------------------------------------------------------------
-Authors: Poltorak Serguei <ps@z-wave.me>
-         Yurkin Vitaliy   <aivs@z-wave.me>
+Authors: Govind Rathi <govind_rathi@hotmail.com>
+        
 Description:
     Implements Security rules and send notifications and activates scene on rule match.
 ******************************************************************************/
@@ -13,9 +14,9 @@ Description:
 // --- Class definition, inheritance and setup
 // ----------------------------------------------------------------------------
 
-function SecurityMode (id, controller) {
+function SecurityModeCustom (id, controller) {
     // Call superconstructor first (AutomationModule)
-    SecurityMode.super_.call(this, id, controller);
+    SecurityModeCustom.super_.call(this, id, controller);
 
     var self = this;
     
@@ -29,16 +30,16 @@ function SecurityMode (id, controller) {
     this.isSensorsCanReact = 1;
 }
 
-inherits(SecurityMode, AutomationModule);
+inherits(SecurityModeCustom, AutomationModule);
 
-_module = SecurityMode;
+_module = SecurityModeCustom;
 
 // ----------------------------------------------------------------------------
 // --- Module instance initialized
 // ----------------------------------------------------------------------------
 
-SecurityMode.prototype.init = function (config) {
-    SecurityMode.super_.prototype.init.call(this, config);
+SecurityModeCustom.prototype.init = function (config) {
+    SecurityModeCustom.super_.prototype.init.call(this, config);
 
     var self = this;
 
@@ -49,13 +50,13 @@ SecurityMode.prototype.init = function (config) {
     if (config.action.email) {this.email = config.action.email.toString();}
     
     this.vDev = this.controller.devices.create({
-            deviceId: "SecurityMode_"+ this.id,
+            deviceId: "SecurityModeCustom_"+ this.id,
             defaults: {
                 deviceType: "switchBinary",
                 metrics: {
                     level: 'off',
                     icon: '',
-                    title: 'SecurityMode ' + this.id
+                    title: 'SecurityModeCustom ' + this.id
                 }
             },
             overlay: {},
@@ -86,7 +87,7 @@ SecurityMode.prototype.init = function (config) {
     });    
 };
 
-SecurityMode.prototype.stop = function () {
+SecurityModeCustom.prototype.stop = function () {
     var self = this;
 
     if (this.timer) {
@@ -112,14 +113,14 @@ SecurityMode.prototype.stop = function () {
         this.vDev = null;
     }
 
-    SecurityMode.super_.prototype.stop.call(this);
+    SecurityModeCustom.super_.prototype.stop.call(this);
 };
 
 // ----------------------------------------------------------------------------
 // --- Module methods
 // ----------------------------------------------------------------------------
 
-SecurityMode.prototype.attachDetach = function (test, attachOrDetach) {
+SecurityModeCustom.prototype.attachDetach = function (test, attachOrDetach) {
     if (attachOrDetach) {
         this.controller.devices.on(test.device, "change:metrics:level", this._testRule);
         this.controller.devices.on(test.device, "change:metrics:change", this._testRule);
@@ -129,7 +130,7 @@ SecurityMode.prototype.attachDetach = function (test, attachOrDetach) {
     }
 };
 
-SecurityMode.prototype.testRule = function (tree) {
+SecurityModeCustom.prototype.testRule = function (tree) {
 
     var res = null,
         topLevel = !tree;
@@ -200,10 +201,29 @@ SecurityMode.prototype.testRule = function (tree) {
                 }
             });
         }
+        
+        // If PushOver API keys are present, send notification
+        if( self.pn_api_key && self.pn_user_key) {
+            http.request({
+                method: 'POST',
+                url: "https://api.pushover.net/1/messages.json",
+                async: true,
+                data: {
+                    token: self.pn_api_key,
+                    user: self.pn_user_key,
+                    device: self.pn_user_device,
+                    title: "Notification from Z-Way",
+                    message: self.message
+                },
+                error: function(response) {
+                    console.log("SecurityModeCustom_NotificationPushover-ERROR: " + response.statusText); 
+                }
+            });
+        }
 
         // Send Notification
-        self.controller.addNotification("warning", self.message, "module", "SecurityMode");
-        self.controller.emit('SecurityMode.alert', self);
+        self.controller.addNotification("warning", self.message, "module", "SecurityModeCustom");
+        self.controller.emit('SecurityModeCustom.alert', self);
 
         tree.action.switches && tree.action.switches.forEach(function(devState) {
             var vDev = self.controller.devices.get(devState.device);
@@ -232,7 +252,7 @@ SecurityMode.prototype.testRule = function (tree) {
     }
 };
 
-SecurityMode.prototype.op = function (dval, op, val) {
+SecurityModeCustom.prototype.op = function (dval, op, val) {
     if (op === "=") {
         return dval === val;
     } else if (op === "!=") {
